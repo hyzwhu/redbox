@@ -14,7 +14,8 @@ ctx-redbox: context [
 	map-img: make image! 480x420
 	moves-file: %moves.ini
 	maps: level: level-data: bg: madman: moves: best: best-list: f-goto: f-lev: go-lev: none
-	man-pos: 0x0 
+	lx: ly: 0
+	man-pos: 0x0
 	load-bin: func [file][reduce bind load load decompress read/binary file 'self]
 
 	maps: load-bin %data1.txt.gz
@@ -31,7 +32,7 @@ ctx-redbox: context [
 	floor: %images/floor.png
 	wall: %images/wall.png
 	target: %images/target.png
-	box: %images/box.png
+	box: load %images/box.png
 	credits: %images/credits.png
 	;--load the imags
 
@@ -70,28 +71,53 @@ ctx-redbox: context [
 	]
 	;--
 
+	dir-to-pos: func [value [word!]][
+		select [up 0x-30 down 0x30 left -30x0 right 30x0] value
+	]
+	can-move?: func [value [word!] /local new1 new nx ny][
+		new1: mad-man/offset - 0x16 + dir-to-pos value 
+		probe new1
+		nx: new1/x / 30
+		ny: new1/y / 30
+		new1: as-pair nx ny
+		probe new1
+		new: tile-type? new1 
+		find [2 3] new 
+	]
 	;--layout: box-world
 	box-world: layout [
 		at 0x16 bg: image map-img
-		at 0x16 mad-man: base 30x30 l1
+		at man-pos mad-man: base 30x30 l1
+	]
+
+	turn: function [value [word!] /local box c-pos b-pos][
+		c-pos: mad-man/offset + dir-to-pos value
+		if can-move? value [
+			;--some function
+		]
 	]
 
 	box-world/actors: make object! [
     on-key-down: func [face [object!] event [event!]][
         switch event/key [
-            up [mad-man/offset: mad-man/offset + 0x-30]
-            down [mad-man/offset: mad-man/offset + 0x30]
-            left [mad-man/offset: mad-man/offset + -30x0]
-            right [mad-man/offset: mad-man/offset + 30x0]
+            up [turn 'up]
+            down [turn 'down]
+            left [turn 'left]
+            right [turn 'right]
         ]
     ]
-]
+	]
+
 
 
 	;--
 	;--draw map
-	draw-map: has [tile][
-		level-data: maps/100
+	draw-map: has [tile lx ly][
+		level-data: maps/1
+		lx: level-data/start/x * 30
+		ly: level-data/start/y * 30 + 16
+		man-pos: as-pair lx ly 
+		box-world/pane/2/offset: man-pos
 		for-pair pos 0x0 15x13 [
 			tile: 0
 			unless zero? tile: tile-type? pos [
@@ -105,6 +131,17 @@ ctx-redbox: context [
 		]
 	]
 	;--draw map
+
+	;--draw boxes
+	draw-boxes: has [bx pos xb yb pb][
+		foreach pos level-data/boxes [
+			xb: pos/x * 30 
+			yb: pos/y * 30 + 16 
+			pb: as-pair xb yb 
+			append box-world/pane bx: make face![type: 'base size: 30x30 offset: pb image: box]
+		]
+	]
+	;--draw boxes
 
 	;--change-image
 	change-image: function [src [image!] dst [image!] pos [pair!]][
@@ -127,9 +164,11 @@ ctx-redbox: context [
 	;--change-image 
 
 	
+	
 	;--
 	start-rebox: function [][
 		draw-map
+		draw-boxes
 		view box-world
 	]
 
