@@ -86,8 +86,9 @@ ctx-redbox: context [
 	]
 	;--layout: box-world
 	box-world: layout/tight [
-		at 0x16 bg: image map-img
-		at man-pos mad-man: base 30x30 l1
+		at 0x0 button "choose" [view level-choose ]
+		at 0x16 image map-img
+		mad-man: base 30x30 l1
 	]
 
 	turn: func [value [word!] /local box c-pos b-pos bp pb next-box][
@@ -95,7 +96,7 @@ ctx-redbox: context [
 		b-pos: find boxes c-pos
 	 	either b-pos [
 			bp: index? b-pos 
-			pb: bp + 2
+			pb: bp + 3
 			next-box: c-pos + dir-to-pos value 
 			if all [can-move? value c-pos  next-is-box? next-box][
 				box-world/pane/:pb/offset: next-box
@@ -113,6 +114,15 @@ ctx-redbox: context [
 
 	]
 
+	level-choose: layout [
+		text "please enter the level that you what" return
+		pad 30x0 fld: field 40x20 return 
+		button "ok" [
+			level: to-integer fld/text
+			init-world
+			unview]
+	] 
+
 	next-is-box?: func[pos [pair!]][
 		either find boxes pos [return false][return true]
 	]
@@ -121,9 +131,10 @@ ctx-redbox: context [
 		system/view/auto-sync?: no
 		clear boxes 
 		clear targets 
-		clear skip box-world/pane 2
+		clear skip box-world/pane 3
 		draw-map
 		draw-boxes
+		show box-world
 		system/view/auto-sync?: yes 
 	]
 
@@ -174,10 +185,13 @@ ctx-redbox: context [
 	;--
 	;--draw map
 	draw-map: has [tile lx ly][
+		map-img/rgb: black
 		level-data: maps/:level
+?? level
 		lx: level-data/start/x * 30
 		ly: level-data/start/y * 30 + 16
 		man-pos: as-pair lx ly 
+?? man-pos 
 		mad-man/offset: man-pos
 		for-pair pos 0x0 15x13 [
 			tile: 0
