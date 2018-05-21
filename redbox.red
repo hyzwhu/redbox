@@ -23,7 +23,7 @@ ctx-redbox: context [
 	box-index: 0
 	load-bin: func [file][reduce bind load load decompress read/binary file 'self]
 	judge: true
-
+	box-move-num: 0
 	maps: load-bin %data1.txt.gz
 
 	;--load the imgs
@@ -100,15 +100,23 @@ ctx-redbox: context [
 		at 30x0 button "undo" bold 30x16 [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
-				poke boxes (:box-index - 4) undo-box  ]
+				move-txt/text: to string! (-1 + to integer! move-txt/text)
+				poke boxes (:box-index - 11) undo-box  
+				undo-box: 0x0]
 			mad-man/offset: undo-man
 		]
+		at 60x0 button "retry" bold 30x16 [init-world]
 		at 0x16 image map-img
-		mad-man: base 30x30 rate 10 now on-time [
+		mad-man: base 30x30 rate 6 now on-time [
 			judge: not judge
 			mad-man/image: pick man-img judge
 		]  
-		at 0x405 text 100x30 font-size 15 bold "helloworld"
+		at 0x405  text 70x30 black font-size 10 font-color white bold "your move:"
+		at 70x405 move-txt: text 15x30 black font-size 10 font-color white bold "0"
+		at 85x405 text 70x30 black font-size 10 font-color white bold "best move:"
+		at 150x405 best-move-txt: text 15x30 black font-size 10 font-color white bold "0"
+		at 165x405 text 70x30 black font-size 10 font-color white bold "your level:"
+		at 230x405 level-txt: text 15x30 black font-size 10 font-color white bold "1"
 	]
 
 	turn: func [value [word!] /local box c-pos b-pos bp pb next-box][
@@ -118,11 +126,12 @@ ctx-redbox: context [
 		b-pos: find boxes c-pos
 	 	either b-pos [
 			bp: index? b-pos 
-			pb: bp + 5
+			pb: bp + 11
 			box-index: :pb 
 			undo-box: c-pos
 			next-box: c-pos + dir-to-pos value 
 			if all [can-move? value c-pos  next-is-box? next-box][
+				move-txt/text: to string! (1 + to integer! move-txt/text) 
 				box-world/pane/:pb/offset: next-box
 				poke boxes bp box-world/pane/:pb/offset
 				mad-man/offset: c-pos
@@ -138,9 +147,9 @@ ctx-redbox: context [
 	]
 
 	level-choose: layout [
-		text "please enter the level that you what" return
-		pad 30x0 fld: field 40x20 return 
-		button "ok" [
+		text bold "please enter the level that you want" return
+		pad 50x0 fld: field 40x20 return 
+		pad 50x0 button bold "ok" [
 			level: to-integer fld/text
 			init-world
 			unview]
@@ -152,10 +161,11 @@ ctx-redbox: context [
 
 	init-world: func[][
 		undo-box: 0x0
+		move-txt/text: to string! 0
 		system/view/auto-sync?: no
 		clear boxes 
 		clear targets 
-		clear skip box-world/pane 5
+		clear skip box-world/pane 11
 		draw-map
 		draw-boxes
 		show box-world
@@ -189,13 +199,6 @@ ctx-redbox: context [
 		pb 
 	]
 
-	p2-to-p1: function [pos [pair!] /local yb xb pb][
-		xb: pos/x /30
-		yb: pos/y - 16 / 30
-		pb: as-pair xb yb
-		pb
-	]
-
 	;--check-win?
 	check-win?: has [win? box a][
 		win?: yes 
@@ -211,6 +214,7 @@ ctx-redbox: context [
 	draw-map: has [tile lx ly][
 		map-img/rgb: black
 		level-data: maps/:level
+		level-txt/text: to string! :level
 		lx: level-data/start/x * 30
 		ly: level-data/start/y * 30 + 16
 		man-pos: as-pair lx ly 
