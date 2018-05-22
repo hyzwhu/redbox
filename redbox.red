@@ -96,8 +96,8 @@ ctx-redbox: context [
 
 	box-world: layout/tight [
 		title "red-box"
-		at 0x0 button "Goto" bold 33x16 [view level-choose ]
-		at 33x0 button "Undo" bold 33x16 [
+		at 0x0 button "Goto" bold 40x16 [view level-choose ]
+		at 40x0 button "Undo" bold 40x16 [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
 				move-txt/text: to string! (-1 + to integer! move-txt/text)
@@ -105,8 +105,8 @@ ctx-redbox: context [
 				undo-box: 0x0]
 			mad-man/offset: undo-man
 		]
-		at 66x0 button "Retry" bold 33x16 [init-world]
-		at 99x0 button "About" bold 33x16 [view about-win]	
+		at 80x0 button "Retry" bold 40x16 [init-world]
+		at 120x0 button "About" bold 40x16 [view about-win]	
 		at 0x16 image map-img
 		mad-man: base 30x30 rate 6 now on-time [
 			judge: not judge
@@ -194,8 +194,8 @@ ctx-redbox: context [
 
 	alert-win: layout [
 		title "red-box"
-		text center "you have done a good job!" return 
-		pad 40x0 button "ok" [
+		text center 200x20 "you have done a good job!" return 
+		pad 70x0 button  "ok" [
 			is-best?
 			unview 
 		]
