@@ -112,12 +112,12 @@ ctx-redbox: context [
 			judge: not judge
 			mad-man/image: pick man-img judge
 		]  
-		at 0x420  text 70x20 black font-size 10 font-color white bold "your move:"
-		at 70x420 move-txt: text 15x20 black font-size 10 font-color white bold "0"
-		at 85x420 text 70x20 black font-size 10 font-color white bold "best move:"
-		at 150x420 best-move-txt: text 15x20 black font-size 10 font-color white bold "0"
-		at 165x420 text 70x20 black font-size 10 font-color white bold "your level:"
-		at 230x420 level-txt: text 15x20 black font-size 10 font-color white bold "1"
+		at 0x420  text 85x20 black font-size 10 font-color white bold "your move: "
+		at 85x420 move-txt: text 15x20 black font-size 10 font-color white bold "0"
+		at 100x420 text 85x20 black font-size 10 font-color white bold "   best move: "
+		at 185x420 best-move-txt: text 15x20 black font-size 10 font-color white bold "0"
+		at 200x420 text 85x20 black font-size 10 font-color white bold "   your level: "
+		at 285x420 level-txt: text 15x20 black font-size 10 font-color white bold "1"
 	]
 
 	is-best?: func [/local bt mt][
@@ -206,7 +206,7 @@ ctx-redbox: context [
 		image center credits return
 		text center 400x20	bold "Original game by Jeng-Long Jiang" return
 		text center 400x20	bold "Rebol port done by Nenad Rakocevic" return 
-		text center 400x20 	bold "Rebol port done by Vigil Huang" return 
+		text center 400x20 	bold "Red port done by Vigil Huang" return 
 	]
 
 	box-world/actors: make object! [
