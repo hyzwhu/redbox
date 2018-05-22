@@ -9,13 +9,12 @@ ctx-redbox: context [
 		2	floor 
 		3	target
 	]
-
 	boxes: make block! 10
 	man-img: make block! 2
 	map-img: make image! 480x420
 	targets: make block! 10
-	moves-file: %moves.ini
-	maps: level: bg: madman: moves: best: best-list: f-goto: f-lev: go-lev: none
+	moves-file: load %moves.ini
+	maps: none 
 	level: 1
 	lx: ly: 0
 	man-pos: 0x0
@@ -26,7 +25,6 @@ ctx-redbox: context [
 	box-move-num: 0
 	maps: load-bin %data1.txt.gz
 
-	;--load the imgs
 	l1: load %images/man-l1.png
 	l2: load %images/man-l2.png
 	r1: load %images/man-r1.png
@@ -40,27 +38,19 @@ ctx-redbox: context [
 	target: %images/target.png
 	box: load %images/box.png
 	credits: %images/credits.png
-	;--load the imags
 
-
-	;--init the man-img
 	append man-img l1 
 	append man-img l2 
-	;--
 
-	;--tile-type
 	tile-type?: function [pos [pair!]][
 		pos: pos + 1x1
 		to-integer pick pick level-data/map pos/y pos/x
 	]
-	;--
 
-	;--decode-tile
 	decode-tile: function [value [integer!]][
 		any [reduce select tiles value 'unknown]
 	]
 
-	;--for-pair 
 	for-pair: function [
 		'word 
 		start 	[pair!] 
@@ -81,11 +71,11 @@ ctx-redbox: context [
 			val/y: val/y + 1
 		]
 	]
-	;--
 
 	dir-to-pos: func [value [word!]][
 		select [up 0x-30 down 0x30 left -30x0 right 30x0] value
 	]
+
 	can-move?: func [value [word!] pos [pair!]/local new1 new nx ny][
 		new1: pos - 0x16 + dir-to-pos value 
 		nx: new1/x / 30
@@ -94,8 +84,9 @@ ctx-redbox: context [
 		new: tile-type? new1 
 		find [2 3] new 
 	]
-	;--layout: box-world
+
 	box-world: layout/tight [
+		title "red-box"
 		at 0x0 button "goto" bold 30x16 [view level-choose ]
 		at 30x0 button "undo" bold 30x16 [
 			if 0x0 <> undo-box [
@@ -119,6 +110,19 @@ ctx-redbox: context [
 		at 230x405 level-txt: text 15x30 black font-size 10 font-color white bold "1"
 	]
 
+	is-best?: func [/local bt mt][
+		mt: to integer! move-txt/text
+		bt: to integer! best-move-txt/text
+		either bt = 0 [
+			poke moves-file :level mt
+		][
+			if bt < mt [
+				poke mvoes-file :level bt 
+			]
+		]
+		write %moves.ini mold moves-file
+	]
+
 	turn: func [value [word!] /local box c-pos b-pos bp pb next-box][
 		undo-box: 0x0
 		undo-man: mad-man/offset
@@ -136,7 +140,12 @@ ctx-redbox: context [
 				poke boxes bp box-world/pane/:pb/offset
 				mad-man/offset: c-pos
 				if check-win? [
+					if :level = 100 [
+						alert-win/pane/1/text: "Victory!"
+					]
 					view/flags alert-win 'modal
+					level: level + 1
+					init-world
 				]
 			] 
 		][
@@ -147,9 +156,10 @@ ctx-redbox: context [
 	]
 
 	level-choose: layout [
+		title "red-box"
 		text bold "please enter the level that you want" return
-		pad 50x0 fld: field 40x20 return 
-		pad 50x0 button bold "ok" [
+		pad 60x0 fld: field 60x20 return 
+		pad 60x0 button bold "ok" [
 			level: to-integer fld/text
 			init-world
 			unview]
@@ -173,10 +183,10 @@ ctx-redbox: context [
 	]
 
 	alert-win: layout [
-		text center "you have done a good job" return 
-		pad 30x0 button "ok" [
-			level: level + 1
-			init-world
+		title "red-box"
+		text center "you have done a good job!" return 
+		pad 40x0 button "ok" [
+			is-best?
 			unview 
 		]
 	]
@@ -199,7 +209,6 @@ ctx-redbox: context [
 		pb 
 	]
 
-	;--check-win?
 	check-win?: has [win? box a][
 		win?: yes 
 		foreach box boxes [
@@ -208,13 +217,11 @@ ctx-redbox: context [
 		win? 
 	]
 
-
-	;--
-	;--draw map
 	draw-map: has [tile lx ly][
 		map-img/rgb: black
 		level-data: maps/:level
 		level-txt/text: to string! :level
+		best-move-txt/text: to string! pick moves-file :level
 		lx: level-data/start/x * 30
 		ly: level-data/start/y * 30 + 16
 		man-pos: as-pair lx ly 
@@ -235,9 +242,7 @@ ctx-redbox: context [
 			]
 		]
 	]
-	;--draw map
 
-	;--draw boxes
 	draw-boxes: has [bx pos pb][
 		foreach pos level-data/boxes [
 			pb: p1-to-p2 pos
@@ -245,9 +250,7 @@ ctx-redbox: context [
 			append boxes pb
 		]
 	]
-	;--draw boxes
 
-	;--change-image
 	change-image: function [src [image!] dst [image!] pos [pair!]][
 		sx: src/size/x
 		dx: dst/size/x 
@@ -265,11 +268,7 @@ ctx-redbox: context [
 			] 
 		]
 	]
-	;--change-image 
 
-	
-	
-	;--
 	start-rebox: function [][
 		draw-map
 		draw-boxes
