@@ -86,7 +86,7 @@ ctx-redbox: context [
 	]
 
 	can-move?: func [value [word!] pos [pair!]/local new1 new nx ny][
-		new1: pos - 0x16 + dir-to-pos value 
+		new1: pos - 0x20 + dir-to-pos value 
 		nx: new1/x / 30
 		ny: new1/y / 30
 		new1: as-pair nx ny
@@ -96,8 +96,8 @@ ctx-redbox: context [
 
 	box-world: layout/tight [
 		title "red-box"
-		at 0x0 button "Goto" bold 40x16 [view level-choose ]
-		at 40x0 button "Undo" bold 40x16 [
+		at 0x0 button "Goto" bold 40x20 [view level-choose ]
+		at 40x0 button "Undo" bold 40x20 [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
 				move-txt/text: to string! (-1 + to integer! move-txt/text)
@@ -105,19 +105,19 @@ ctx-redbox: context [
 				undo-box: 0x0]
 			mad-man/offset: undo-man
 		]
-		at 80x0 button "Retry" bold 40x16 [init-world]
-		at 120x0 button "About" bold 40x16 [view about-win]	
-		at 0x16 image map-img
+		at 80x0 button "Retry" bold 40x20 [init-world]
+		at 120x0 button "About" bold 40x20 [view about-win]	
+		at 0x20 image map-img
 		mad-man: base 30x30 rate 6 now on-time [
 			judge: not judge
 			mad-man/image: pick man-img judge
 		]  
-		at 0x405  text 70x30 black font-size 10 font-color white bold "your move:"
-		at 70x405 move-txt: text 15x30 black font-size 10 font-color white bold "0"
-		at 85x405 text 70x30 black font-size 10 font-color white bold "best move:"
-		at 150x405 best-move-txt: text 15x30 black font-size 10 font-color white bold "0"
-		at 165x405 text 70x30 black font-size 10 font-color white bold "your level:"
-		at 230x405 level-txt: text 15x30 black font-size 10 font-color white bold "1"
+		at 0x420  text 70x20 black font-size 10 font-color white bold "your move:"
+		at 70x420 move-txt: text 15x20 black font-size 10 font-color white bold "0"
+		at 85x420 text 70x20 black font-size 10 font-color white bold "best move:"
+		at 150x420 best-move-txt: text 15x20 black font-size 10 font-color white bold "0"
+		at 165x420 text 70x20 black font-size 10 font-color white bold "your level:"
+		at 230x420 level-txt: text 15x20 black font-size 10 font-color white bold "1"
 	]
 
 	is-best?: func [/local bt mt][
@@ -126,8 +126,8 @@ ctx-redbox: context [
 		either bt = 0 [
 			poke moves-file :level mt
 		][
-			if bt < mt [
-				poke mvoes-file :level bt 
+			if bt > mt [
+				poke moves-file :level mt 
 			]
 		]
 		write %moves.ini mold moves-file
@@ -222,7 +222,7 @@ ctx-redbox: context [
 
 	p1-to-p2: function [pos [pair!] /local yb xb pb][
 		xb: pos/x * 30 
-		yb: pos/y * 30 + 16 
+		yb: pos/y * 30 + 20 
 		pb: as-pair xb yb
 		pb 
 	]
@@ -241,7 +241,7 @@ ctx-redbox: context [
 		level-txt/text: to string! :level
 		best-move-txt/text: to string! pick moves-file :level
 		lx: level-data/start/x * 30
-		ly: level-data/start/y * 30 + 16
+		ly: level-data/start/y * 30 + 20
 		man-pos: as-pair lx ly 
 		mad-man/offset: man-pos
 		undo-man: man-pos
@@ -252,7 +252,7 @@ ctx-redbox: context [
 				py: pos/y * 30
 				pos1: as-pair px py
 				if 3 = tile [
-					append targets as-pair px (py + 16)
+					append targets as-pair px (py + 20)
 				]
 				tile: decode-tile tile
 				tile: load tile
