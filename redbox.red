@@ -1,6 +1,15 @@
 Red [
-    Title: "Red-Box"
-    Needs: 'View
+    Title:	 "red-box"
+	Author:  "Huang Yongzhao"
+	File: 	 %redbox.red
+	Tabs:	 4
+	Version: "Alpha"
+	Purpose: "Famous BoxWorld! game ported to red"
+	Rights:  "Copyright (C) 2015-2018 Red Foundation. All rights reserved."
+	License: {
+		Distributed under the Boost Software License, Version 1.0.
+		See https://github.com/red/red/blob/master/BSL-License.txt
+	}
 ]
 
 ctx-redbox: context [
@@ -33,11 +42,11 @@ ctx-redbox: context [
 	d2: load %images/man-d2.png
 	u1: load %images/man-u1.png
 	u2: load %images/man-u2.png
+	box: load %images/box.png
+	credits: load %images/credits.png
 	floor: %images/floor.png
 	wall: %images/wall.png
 	target: %images/target.png
-	box: load %images/box.png
-	credits: %images/credits.png
 
 	append man-img l1 
 	append man-img l2 
@@ -87,16 +96,17 @@ ctx-redbox: context [
 
 	box-world: layout/tight [
 		title "red-box"
-		at 0x0 button "goto" bold 30x16 [view level-choose ]
-		at 30x0 button "undo" bold 30x16 [
+		at 0x0 button "Goto" bold 33x16 [view level-choose ]
+		at 33x0 button "Undo" bold 33x16 [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
 				move-txt/text: to string! (-1 + to integer! move-txt/text)
-				poke boxes (:box-index - 11) undo-box  
+				poke boxes (:box-index - 12) undo-box  
 				undo-box: 0x0]
 			mad-man/offset: undo-man
 		]
-		at 60x0 button "retry" bold 30x16 [init-world]
+		at 66x0 button "Retry" bold 33x16 [init-world]
+		at 99x0 button "About" bold 33x16 [view about-win]	
 		at 0x16 image map-img
 		mad-man: base 30x30 rate 6 now on-time [
 			judge: not judge
@@ -130,7 +140,7 @@ ctx-redbox: context [
 		b-pos: find boxes c-pos
 	 	either b-pos [
 			bp: index? b-pos 
-			pb: bp + 11
+			pb: bp + 12
 			box-index: :pb 
 			undo-box: c-pos
 			next-box: c-pos + dir-to-pos value 
@@ -175,7 +185,7 @@ ctx-redbox: context [
 		system/view/auto-sync?: no
 		clear boxes 
 		clear targets 
-		clear skip box-world/pane 11
+		clear skip box-world/pane 12
 		draw-map
 		draw-boxes
 		show box-world
@@ -189,6 +199,14 @@ ctx-redbox: context [
 			is-best?
 			unview 
 		]
+	]
+
+	about-win: layout [
+		title "red-box"
+		image center credits return
+		text center 400x20	bold "Original game by Jeng-Long Jiang" return
+		text center 400x20	bold "Rebol port done by Nenad Rakocevic" return 
+		text center 400x20 	bold "Rebol port done by Vigil Huang" return 
 	]
 
 	box-world/actors: make object! [
@@ -256,8 +274,7 @@ ctx-redbox: context [
 		dx: dst/size/x 
 		sy: src/size/y
 		px: pos/x
-		py: pos/y
-		
+		py: pos/y	
 		repeat y sy [
 			xs: y - 1 * sx  + 1 
 			xd: y + py - 1 * dx  + 1 + px 
