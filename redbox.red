@@ -111,7 +111,7 @@ ctx-redbox: context [
 		]
 		at 80x0 btn "Retry" [init-world]
 		at 120x0 btn "About" [view about-win]	
-		at 0x20 image map-img
+		at 0x20 base map-img
 		mad-man: base transparent 30x30 rate 6 now on-time [
 			judge: not judge
 			mad-man/image: pick man-img judge
@@ -181,11 +181,11 @@ ctx-redbox: context [
 			unview]
 	] 
 
-	next-is-box?: func[pos [pair!]][
-		either find boxes pos [return false][return true]
+	next-is-box?: func [pos [pair!]][
+		none? find boxes pos
 	]
 
-	init-world: func[][
+	init-world: func [][
 		undo-box: 0x0
 		move-txt/data: 0
 		system/view/auto-sync?: no
