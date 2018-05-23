@@ -33,20 +33,20 @@ ctx-redbox: context [
 	judge: true
 	box-move-num: 0
 	maps: load-bin %data1.txt.gz
-
-	l1: load %images/man-l1.png
-	l2: load %images/man-l2.png
-	r1: load %images/man-r1.png
-	r2: load %images/man-r2.png
-	d1: load %images/man-d1.png
-	d2: load %images/man-d2.png
-	u1: load %images/man-u1.png
-	u2: load %images/man-u2.png
-	box: load %images/box.png
-	credits: load %images/credits.png
-	floor: %images/floor.png
-	wall: %images/wall.png
-	target: %images/target.png
+	all-image: load %all-image.png
+	l1: copy/part all-image 30x30 
+	l2: copy/part skip all-image 30 30x30
+	r1: copy/part skip all-image 60 30x30
+	r2: copy/part skip all-image 90 30x30
+	d1: copy/part skip all-image 120 30x30
+	d2: copy/part skip all-image 150 30x30
+	u1: copy/part skip all-image 180 30x30
+	u2: copy/part skip all-image 210 30x30
+	box1: copy/part skip all-image 240 30x30
+	wall: copy/part skip all-image 270 30x30
+	floor: copy/part skip all-image 300 30x30
+	target: copy/part skip all-image 330 30x30
+	credits: copy/part skip all-image 378 * 30 378x292
 
 	append man-img l1 
 	append man-img l2 
@@ -96,8 +96,9 @@ ctx-redbox: context [
 
 	box-world: layout/tight [
 		title "red-box"
-		at 0x0 button "Goto" bold 40x20 [view level-choose ]
-		at 40x0 button "Undo" bold 40x20 [
+		style btn: button bold 40x20
+		at 0x0 btn"Goto" [view level-choose ]
+		at 40x0 btn "Undo" [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
 				move-txt/text: to string! (-1 + to integer! move-txt/text)
@@ -105,19 +106,21 @@ ctx-redbox: context [
 				undo-box: 0x0]
 			mad-man/offset: undo-man
 		]
-		at 80x0 button "Retry" bold 40x20 [init-world]
-		at 120x0 button "About" bold 40x20 [view about-win]	
+		at 80x0 btn "Retry" [init-world]
+		at 120x0 btn "About" [view about-win]	
 		at 0x20 image map-img
-		mad-man: base 30x30 rate 6 now on-time [
+		mad-man: base transparent 30x30 rate 6 now on-time [
 			judge: not judge
 			mad-man/image: pick man-img judge
 		]  
-		at 0x420  text 85x20 black font-size 10 font-color white bold "your move: "
-		at 85x420 move-txt: text 15x20 black font-size 10 font-color white bold "0"
-		at 100x420 text 85x20 black font-size 10 font-color white bold "   best move: "
-		at 185x420 best-move-txt: text 15x20 black font-size 10 font-color white bold "0"
-		at 200x420 text 85x20 black font-size 10 font-color white bold "   your level: "
-		at 285x420 level-txt: text 15x20 black font-size 10 font-color white bold "1"
+		style txt: text 85x20 black font-size 10 font-color white bold
+		style num: text 15x20 black font-size 10 font-color white bold 
+		at 0x420  txt "your move: "
+		at 85x420 move-txt: num "0"
+		at 100x420 txt "   best move: "
+		at 185x420 best-move-txt: num "0"
+		at 200x420 txt "   your level: "
+		at 285x420 level-txt: num "1"
 	]
 
 	is-best?: func [/local bt mt][
@@ -212,26 +215,21 @@ ctx-redbox: context [
 	box-world/actors: make object! [
     on-key-down: func [face [object!] event [event!]][
         switch event/key [
-            up [poke man-img 1 u1 poke man-img 2 u2 turn 'up ]
-            down [poke man-img 1 d1 poke man-img 2 d2 turn 'down]
-            left [poke man-img 1 l1 poke man-img 2 l2 turn 'left]
+            up	  [man-img/1: u1 man-img/2: u2 turn 'up ]
+            down  [poke man-img 1 d1 poke man-img 2 d2 turn 'down]
+            left  [poke man-img 1 l1 poke man-img 2 l2 turn 'left]
             right [poke man-img 1 r1 poke man-img 2 r2 turn 'right]
         ]
     ]
 	]
 
 	p1-to-p2: function [pos [pair!] /local yb xb pb][
-		xb: pos/x * 30 
-		yb: pos/y * 30 + 20 
-		pb: as-pair xb yb
-		pb 
+		pb: pos * 30 + 0x20 
 	]
 
 	check-win?: has [win? box a][
 		win?: yes 
-		foreach box boxes [
-			a: either find targets box [true][false]
-			win?: win? and a ]
+		foreach box boxes [win?: all [win? find targets box]]
 		win? 
 	]
 
@@ -240,23 +238,15 @@ ctx-redbox: context [
 		level-data: maps/:level
 		level-txt/text: to string! :level
 		best-move-txt/text: to string! pick moves-file :level
-		lx: level-data/start/x * 30
-		ly: level-data/start/y * 30 + 20
-		man-pos: as-pair lx ly 
-		mad-man/offset: man-pos
-		undo-man: man-pos
+		man-pos: undo-man: mad-man/offset: level-data/start * 30 + 0x20
 		for-pair pos 0x0 15x13 [
 			tile: 0
 			unless zero? tile: tile-type? pos [
-				px: pos/x * 30
-				py: pos/y * 30
-				pos1: as-pair px py
 				if 3 = tile [
-					append targets as-pair px (py + 20)
+					append targets pos * 30 + 0x20 
 				]
 				tile: decode-tile tile
-				tile: load tile
-				change-image tile map-img pos1  
+				change-image tile map-img pos * 30  
 			]
 		]
 	]
@@ -264,7 +254,7 @@ ctx-redbox: context [
 	draw-boxes: has [bx pos pb][
 		foreach pos level-data/boxes [
 			pb: p1-to-p2 pos
-			append box-world/pane bx: make face![type: 'base size: 30x30 offset: pb image: box]
+			append box-world/pane bx: make face![type: 'base size: 30x30 offset: pb image: box1]
 			append boxes pb
 		]
 	]
