@@ -34,19 +34,22 @@ ctx-redbox: context [
 	box-move-num: 0
 	maps: load-bin %data1.txt.gz
 	all-image: load %all-image.png
-	l1: copy/part all-image 30x30 
-	l2: copy/part skip all-image 30 30x30
-	r1: copy/part skip all-image 60 30x30
-	r2: copy/part skip all-image 90 30x30
-	d1: copy/part skip all-image 120 30x30
-	d2: copy/part skip all-image 150 30x30
-	u1: copy/part skip all-image 180 30x30
-	u2: copy/part skip all-image 210 30x30
-	box1: copy/part skip all-image 240 30x30
-	wall: copy/part skip all-image 270 30x30
-	floor: copy/part skip all-image 300 30x30
-	target: copy/part skip all-image 330 30x30
-	credits: copy/part skip all-image 378 * 30 378x292
+	extrat: function [offset [integer!] size [pair!]][
+		copy/part skip all-image offset size 
+	]
+	l1: extrat 0 30x30 
+	l2: extrat 30 30x30
+	r1: extrat 60 30x30
+	r2: extrat 90 30x30
+	d1: extrat 120 30x30
+	d2: extrat 150 30x30
+	u1: extrat 180 30x30
+	u2: extrat 210 30x30
+	box1: extrat 240 30x30
+	wall: extrat 270 30x30
+	floor: extrat 300 30x30
+	target: extrat 330 30x30
+	credits: extrat 378 * 30 378x292
 
 	append man-img l1 
 	append man-img l2 
@@ -101,7 +104,7 @@ ctx-redbox: context [
 		at 40x0 btn "Undo" [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
-				move-txt/text: to string! (-1 + to integer! move-txt/text)
+				move-txt/data: move-txt/data - 1
 				poke boxes (:box-index - 12) undo-box  
 				undo-box: 0x0]
 			mad-man/offset: undo-man
@@ -124,8 +127,8 @@ ctx-redbox: context [
 	]
 
 	is-best?: func [/local bt mt][
-		mt: to integer! move-txt/text
-		bt: to integer! best-move-txt/text
+		mt: move-txt/data 
+		bt: best-move-txt/data
 		either bt = 0 [
 			poke moves-file :level mt
 		][
@@ -148,7 +151,7 @@ ctx-redbox: context [
 			undo-box: c-pos
 			next-box: c-pos + dir-to-pos value 
 			if all [can-move? value c-pos  next-is-box? next-box][
-				move-txt/text: to string! (1 + to integer! move-txt/text) 
+				move-txt/data: 1 + move-txt/data
 				box-world/pane/:pb/offset: next-box
 				poke boxes bp box-world/pane/:pb/offset
 				mad-man/offset: c-pos
@@ -184,7 +187,7 @@ ctx-redbox: context [
 
 	init-world: func[][
 		undo-box: 0x0
-		move-txt/text: to string! 0
+		move-txt/data: 0
 		system/view/auto-sync?: no
 		clear boxes 
 		clear targets 
@@ -207,24 +210,20 @@ ctx-redbox: context [
 	about-win: layout [
 		title "red-box"
 		image center credits return
-		text center 400x20	bold "Original game by Jeng-Long Jiang" return
-		text center 400x20	bold "Rebol port done by Nenad Rakocevic" return 
-		text center 400x20 	bold "Red port done by Vigil Huang" return 
+		text center 400x20	bold "Original game by Jeng-Long Jiang (1992)" return
+		text center 400x20	bold "Rebol port done by Nenad Rakocevic (2001)" return 
+		text center 400x20 	bold "Red port done by Yongzhao Huang (2018)" return 
 	]
 
 	box-world/actors: make object! [
     on-key-down: func [face [object!] event [event!]][
         switch event/key [
             up	  [man-img/1: u1 man-img/2: u2 turn 'up ]
-            down  [poke man-img 1 d1 poke man-img 2 d2 turn 'down]
-            left  [poke man-img 1 l1 poke man-img 2 l2 turn 'left]
-            right [poke man-img 1 r1 poke man-img 2 r2 turn 'right]
+            down  [man-img/1: d1 man-img/2: d2 turn 'down]
+            left  [man-img/1: l1 man-img/2: l2 turn 'left]
+            right [man-img/1: r1 man-img/2: r2 turn 'right]
         ]
     ]
-	]
-
-	p1-to-p2: function [pos [pair!] /local yb xb pb][
-		pb: pos * 30 + 0x20 
 	]
 
 	check-win?: has [win? box a][
@@ -236,8 +235,8 @@ ctx-redbox: context [
 	draw-map: has [tile lx ly][
 		map-img/rgb: black
 		level-data: maps/:level
-		level-txt/text: to string! :level
-		best-move-txt/text: to string! pick moves-file :level
+		level-txt/data: :level
+		best-move-txt/data: pick moves-file :level
 		man-pos: undo-man: mad-man/offset: level-data/start * 30 + 0x20
 		for-pair pos 0x0 15x13 [
 			tile: 0
@@ -253,7 +252,7 @@ ctx-redbox: context [
 
 	draw-boxes: has [bx pos pb][
 		foreach pos level-data/boxes [
-			pb: p1-to-p2 pos
+			pb: pos * 30 + 0x20
 			append box-world/pane bx: make face![type: 'base size: 30x30 offset: pb image: box1]
 			append boxes pb
 		]
