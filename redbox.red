@@ -1,4 +1,5 @@
 Red [
+	Needs: View
     Title:	 "red-box"
 	Author:  "Huang Yongzhao"
 	File: 	 %redbox.red
@@ -29,7 +30,7 @@ ctx-redbox: context [
 	man-pos: 0x0
 	undo-box: undo-man: 0x0
 	box-index: 0
-	load-bin: func [file][reduce bind load load decompress read/binary file 'self]
+	load-bin: func [file][reduce load  decompress read/binary file]
 	judge: true
 	box-move-num: 0
 	maps: load-bin %data1.txt.gz
@@ -64,7 +65,7 @@ ctx-redbox: context [
 	]
 
 	for-pair: function [
-		'word 
+		'word 	[word!]
 		start 	[pair!] 
 		end 	[pair!] 
 		body 	[block!] 
@@ -130,10 +131,10 @@ ctx-redbox: context [
 		mt: move-txt/data 
 		bt: best-move-txt/data
 		either bt = 0 [
-			poke moves-file :level mt
+			poke moves-file level mt
 		][
 			if bt > mt [
-				poke moves-file :level mt 
+				poke moves-file level mt 
 			]
 		]
 		write %moves.ini mold moves-file
@@ -156,7 +157,7 @@ ctx-redbox: context [
 				poke boxes bp box-world/pane/:pb/offset
 				mad-man/offset: c-pos
 				if check-win? [
-					if :level = 100 [
+					if level = 100 [
 						alert-win/pane/1/text: "Victory!"
 					]
 					view/flags alert-win 'modal
@@ -178,7 +179,8 @@ ctx-redbox: context [
 		pad 60x0 button bold "ok" [
 			level: to-integer fld/text
 			init-world
-			unview]
+			unview
+		]
 	] 
 
 	next-is-box?: func [pos [pair!]][
