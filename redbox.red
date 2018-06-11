@@ -50,7 +50,8 @@ ctx-redbox: context [
 	wall: extrat 270 30x30
 	floor: extrat 300 30x30
 	target: extrat 330 30x30
-	credits: extrat 378 * 30 378x292
+	box2: extrat 360 30x30
+	credits: extrat 390 * 30 378x292
 
 	append man-img l1 
 	append man-img l2 
@@ -101,17 +102,18 @@ ctx-redbox: context [
 	box-world: layout/tight [
 		title "red-box"
 		style btn: button bold 40x20
-		at 0x0 btn"Goto" [view level-choose ]
+		at 0x0 btn "Goto" [level-choose/offset: none view level-choose]
 		at 40x0 btn "Undo" [
 			if 0x0 <> undo-box [
 				box-world/pane/:box-index/offset: undo-box
 				move-txt/data: move-txt/data - 1
 				poke boxes (:box-index - 12) undo-box  
-				undo-box: 0x0]
+				undo-box: 0x0
+			]
 			mad-man/offset: undo-man
 		]
 		at 80x0 btn "Retry" [init-world]
-		at 120x0 btn "About" [view about-win]	
+		at 120x0 btn "About" [about-win/offset: none view about-win]	
 		at 0x20 base map-img
 		mad-man: base transparent 30x30 rate 6 now on-time [
 			judge: not judge
@@ -160,6 +162,7 @@ ctx-redbox: context [
 					if level = 100 [
 						alert-win/pane/1/text: "Victory!"
 					]
+					alert-win/offset: none 
 					view/flags alert-win 'modal
 					level: level + 1
 					init-world
@@ -228,9 +231,16 @@ ctx-redbox: context [
     ]
 	]
 
-	check-win?: has [win? box a][
+	check-win?: has [win? box a i pb][
 		win?: yes 
-		foreach box boxes [win?: all [win? find targets box]]
+		i: 1 
+		foreach box boxes [
+			a: find targets box
+			pb: 12 + i
+			either a [box-world/pane/:pb/image: box2][box-world/pane/:pb/image: box1]
+			win?: all [win? a]
+			i: i + 1
+		]
 		win? 
 	]
 
