@@ -35,23 +35,23 @@ ctx-redbox: context [
 	box-move-num: 0
 	maps: load-bin %data1.txt.gz
 	all-image: load %all-image.png
-	extrat: function [offset [integer!] size [pair!]][
+	extract: function [offset [integer!] size [pair!]][
 		copy/part skip all-image offset size 
 	]
-	l1: extrat 0 30x30 
-	l2: extrat 30 30x30
-	r1: extrat 60 30x30
-	r2: extrat 90 30x30
-	d1: extrat 120 30x30
-	d2: extrat 150 30x30
-	u1: extrat 180 30x30
-	u2: extrat 210 30x30
-	box1: extrat 240 30x30
-	wall: extrat 270 30x30
-	floor: extrat 300 30x30
-	target: extrat 330 30x30
-	box2: extrat 360 30x30
-	credits: extrat 390 * 30 378x292
+	l1: extract 0 30x30 
+	l2: extract 30 30x30
+	r1: extract 60 30x30
+	r2: extract 90 30x30
+	d1: extract 120 30x30
+	d2: extract 150 30x30
+	u1: extract 180 30x30
+	u2: extract 210 30x30
+	box1: extract 240 30x30
+	wall: extract 270 30x30
+	floor: extract 300 30x30
+	target: extract 330 30x30
+	box2: extract 360 30x30
+	credits: extract 390 * 30 378x292
 
 	append man-img l1 
 	append man-img l2 
