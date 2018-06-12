@@ -133,10 +133,10 @@ ctx-redbox: context [
 		mt: move-txt/data 
 		bt: best-move-txt/data
 		either bt = 0 [
-			poke moves-file level mt
+			moves-file/:level: mt
 		][
 			if bt > mt [
-				poke moves-file level mt 
+				moves-file/:level: mt 
 			]
 		]
 		write %moves.ini mold moves-file
@@ -156,7 +156,7 @@ ctx-redbox: context [
 			if all [can-move? value c-pos  next-is-box? next-box][
 				move-txt/data: 1 + move-txt/data
 				box-world/pane/:pb/offset: next-box
-				poke boxes bp box-world/pane/:pb/offset
+				boxes/:bp: box-world/pane/:pb/offset
 				mad-man/offset: c-pos
 				if check-win? [
 					if level = 100 [
