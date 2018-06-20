@@ -33,7 +33,7 @@ ctx-redbox: context [
 	load-bin: func [file][reduce load  decompress read/binary file]
 	judge: true
 	box-move-num: 0
-	maps: load-bin %data1.txt.gz
+	maps: load-bin %map.gz
 	all-image: load %all-image.png
 	extract: function [offset [integer!] size [pair!]][
 		copy/part skip all-image offset size 
