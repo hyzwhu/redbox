@@ -221,14 +221,14 @@ ctx-redbox: context [
 	]
 
 	box-world/actors: make object! [
-    on-key-down: func [face [object!] event [event!]][
-        switch event/key [
-            up	  [man-img/1: u1 man-img/2: u2 turn 'up ]
-            down  [man-img/1: d1 man-img/2: d2 turn 'down]
-            left  [man-img/1: l1 man-img/2: l2 turn 'left]
-            right [man-img/1: r1 man-img/2: r2 turn 'right]
-        ]
-    ]
+		on-key-down: func [face [object!] event [event!]][
+			switch event/key [
+				up	  [man-img/1: u1 man-img/2: u2 turn 'up ]
+				down  [man-img/1: d1 man-img/2: d2 turn 'down]
+				left  [man-img/1: l1 man-img/2: l2 turn 'left]
+				right [man-img/1: r1 man-img/2: r2 turn 'right]
+			]
+		]
 	]
 
 	check-win?: has [win? box a i pb][
